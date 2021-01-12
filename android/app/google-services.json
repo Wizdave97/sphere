@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "872931564102",
+    "project_id": "sphere-33191",
+    "storage_bucket": "sphere-33191.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:872931564102:android:1369a75f729933abe14847",
+        "android_client_info": {
+          "package_name": "com.davidsalami.sphere"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "872931564102-svnugj2d9q0lfr20usav134gk8ufll5s.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.davidsalami.sphere",
+            "certificate_hash": "22b8f8fbedb5cfee573171102c1c3f16d2f27fc6"
+          }
+        },
+        {
+          "client_id": "872931564102-6n7or04pf8cgkdl1tpdopo33f5ghp0j9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyALeebVfuv8FCD4VPQPKQ8EcHytYyAYwb8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "872931564102-6n7or04pf8cgkdl1tpdopo33f5ghp0j9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

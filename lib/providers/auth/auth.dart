@@ -1,10 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sphere/models/users.dart' as UserModel;
 
 class Auth {
   final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email', 'profile']);
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   static SharedPreferences sharedPreferences;
   User user;
   bool isAuthenticating = false;
@@ -31,9 +34,13 @@ class Auth {
       isAuthenticated = true;
       isAuthenticating = false;
       sharedPreferences.setString('SIGN_IN_METHOD', GoogleAuthProvider.GOOGLE_SIGN_IN_METHOD);
+      QuerySnapshot snapshot = await _firestore.collection('users').where('userId', isEqualTo: _firebaseAuth.currentUser.uid).get();
+      if(snapshot.docs.length >= 1) return;
+      await UserModel.User.createUser(_firebaseAuth.currentUser);
     } catch (e) {
       isAuthenticating = false;
-      authError = false;
+      authError = true;
+      isAuthenticated = false;
     }
   }
 

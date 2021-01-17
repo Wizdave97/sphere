@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 const MOVIE_DB_API_KEY = 'ed40b93de9b663b42c97a23a035a84ad';
 const assetBaseUrl = 'https://image.tmdb.org/t/p/w500';
 const int kBottomNavColor = 0xffA0142C;

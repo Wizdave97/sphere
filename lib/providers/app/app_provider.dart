@@ -2,16 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:sphere/providers/app/genre.dart';
 import 'package:sphere/providers/app/movie_data.dart';
 import 'package:sphere/providers/app/now_playing_data.dart';
+import 'package:sphere/providers/app/search.dart';
 import 'package:sphere/providers/app/suggestions_data.dart';
 
 class AppService extends ChangeNotifier {
   List<dynamic> genres;
   NowPlayingData nowPlayingData = NowPlayingData();
   SuggestionsData suggestionsData = SuggestionsData();
+  Search search = Search();
   Map<int, Movie> movies = {};
+
 
   AppService() {
     fetchGenres();
+  }
+
+  String getGenreName() {
+    String genre;
+    genres.forEach((element) {if(element['id'] == suggestionsData.selectedGenreId) genre = element['name'];});
+    return genre;
   }
   Future<void> fetchGenres() async {
     genres = await Genres.getGenres();

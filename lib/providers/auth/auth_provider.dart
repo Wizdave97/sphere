@@ -4,16 +4,15 @@ import 'package:sphere/providers/auth/auth.dart';
 class AuthService extends ChangeNotifier {
   final Auth auth = Auth();
 
-  Future<void> signIn() async {
+  Future<bool> signIn() async {
     await auth.login();
-    update();
+    notifyListeners();
+    return auth.isAuthenticated;
   }
 
-  Future<void> signOut() async {
+  Future<bool> signOut() async {
     await auth.signOut();
-    update();
-  }
-  void update() {
     notifyListeners();
+    return auth.isAuthenticated;
   }
 }

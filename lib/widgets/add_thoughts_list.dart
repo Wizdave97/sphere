@@ -35,46 +35,47 @@ class _AddThoughtsListState extends State<AddThoughtsList> {
     initializeWatchlist();
     super.initState();
   }
+
   void initializeMovieReviews() async {
     try {
-      QuerySnapshot review = await _firestore.collection('reviews')
+      QuerySnapshot review = await _firestore
+          .collection('reviews')
           .where('movieId', isEqualTo: widget.movieId)
-          .where('userId', isEqualTo: _firebaseAuth.currentUser.uid).get();
+          .where('userId', isEqualTo: _firebaseAuth.currentUser.uid)
+          .get();
       List<QueryDocumentSnapshot> data = review.docs;
-      if(data.isNotEmpty) {
+      if (data.isNotEmpty) {
         setState(() {
           reviewTextController.text = data.first.data()['review'];
           reviewed = true;
           reviewId = data.first.id;
         });
-      }
-      else {
+      } else {
         setState(() {
           reviewed = false;
         });
       }
-    }
-    catch(e) {}
+    } catch (e) {}
   }
 
   void initializeWatchlist() async {
     try {
-      QuerySnapshot watch = await _firestore.collection('watchlist')
+      QuerySnapshot watch = await _firestore
+          .collection('watchlist')
           .where('movieId', isEqualTo: widget.movieId)
-          .where('userId', isEqualTo: _firebaseAuth.currentUser.uid).get();
-      if(watch.docs.isNotEmpty) {
+          .where('userId', isEqualTo: _firebaseAuth.currentUser.uid)
+          .get();
+      if (watch.docs.isNotEmpty) {
         setState(() {
           watchListed = true;
           watchListId = watch.docs.first.id;
         });
-      }
-      else {
+      } else {
         setState(() {
           watchListed = false;
         });
-
       }
-    } catch(e){}
+    } catch (e) {}
   }
 
   @override
@@ -166,17 +167,19 @@ class _AddThoughtsListState extends State<AddThoughtsList> {
       ),
     );
   }
+
   Future<void> onPublishReview() async {
     if (review.trim().isEmpty) return;
     try {
       setState(() {
         publishingThought = true;
       });
-      if(reviewed) {
-        await _firestore.collection('reviews').doc(reviewId).
-        update({'review': review});
-      }
-      else {
+      if (reviewed) {
+        await _firestore
+            .collection('reviews')
+            .doc(reviewId)
+            .update({'review': review});
+      } else {
         await _firestore.collection('reviews').add({
           'movieId': widget.movieId,
           'review': review,
@@ -199,14 +202,13 @@ class _AddThoughtsListState extends State<AddThoughtsList> {
       setState(() {
         watchListing = true;
       });
-      if(!watchListed) {
+      if (!watchListed) {
         await _firestore.collection('watchlist').add({
           'movieId': widget.movieId,
           'userId': _firebaseAuth.currentUser.uid
         });
       } else {
-        await _firestore.collection('watchlist').doc(watchListId)
-            .delete();
+        await _firestore.collection('watchlist').doc(watchListId).delete();
       }
       setState(() {
         watchListing = false;
@@ -227,38 +229,40 @@ class MovieTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    AppService appService = Provider.of<AppService>(context);
-    Movie movie = appService.movies[movieId];
-    return ListTile(
-      leading: Container(
-        height: 50.0,
-        width: 50.0,
-        decoration: BoxDecoration(
-            color: Color(0xff2F2F30),
-            borderRadius: BorderRadius.circular(10.0),
-            image: movie.movie != null
-                ? DecorationImage(
-                    fit: BoxFit.cover,
-                    image: NetworkImage(
-                        '$assetBaseUrl${movie.movie['poster_path']}'))
-                : null),
-        clipBehavior: Clip.hardEdge,
-      ),
-      title: renderTitle(movie),
-      subtitle: renderGenres(appService),
-      onTap: () {
-        appService.fetchMovieCredits(movieId);
-        appService.fetchMoviePosters(movieId);
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => MovieScreen(
-              movieId: movieId,
+
+    return Consumer<AppService>(builder: (context, appService, child) {
+      Movie movie = appService.movies[movieId];
+      return ListTile(
+        leading: Container(
+          height: 50.0,
+          width: 50.0,
+          decoration: BoxDecoration(
+              color: Color(0xff2F2F30),
+              borderRadius: BorderRadius.circular(10.0),
+              image: movie.movie != null
+                  ? DecorationImage(
+                      fit: BoxFit.cover,
+                      image: NetworkImage(
+                          '$assetBaseUrl${movie.movie['poster_path']}'))
+                  : null),
+          clipBehavior: Clip.hardEdge,
+        ),
+        title: renderTitle(movie),
+        subtitle: renderGenres(appService),
+        onTap: () {
+          appService.fetchMovieCredits(movieId);
+          appService.fetchMoviePosters(movieId);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MovieScreen(
+                movieId: movieId,
+              ),
             ),
-          ),
-        );
-      },
-    );
+          );
+        },
+      );
+    });
   }
 
   Widget renderTitle(Movie movie) {

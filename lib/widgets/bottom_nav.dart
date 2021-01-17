@@ -24,7 +24,7 @@ class BottomNav extends StatelessWidget {
           icon: Icon(
             Icons.comment,
           ),
-          label: 'Thoughts'
+          label: 'Reviews'
         ),
         BottomNavigationBarItem(
           icon: Icon(

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sphere/common/constants.dart';
@@ -16,6 +17,7 @@ class SuggestionCard extends StatelessWidget {
   final List<String> genres;
 
   SuggestionCard(
+      Key key,
       {this.id,
       this.title,
       this.release,
@@ -50,6 +52,7 @@ class SuggestionCard extends StatelessWidget {
       child: Container(
         margin: EdgeInsets.only(top: 10.0, bottom: 10.0),
         height: 120.0,
+        color: Colors.black.withOpacity(0.0),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

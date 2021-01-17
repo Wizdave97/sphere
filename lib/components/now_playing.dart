@@ -12,8 +12,7 @@ class NowPlaying extends StatefulWidget {
   _NowPlayingState createState() => _NowPlayingState();
 }
 
-class _NowPlayingState extends State<NowPlaying> with ChangeNotifier{
-
+class _NowPlayingState extends State<NowPlaying> {
   ScrollController _scrollController;
   bool fetchingMore = false;
   @override
@@ -22,35 +21,43 @@ class _NowPlayingState extends State<NowPlaying> with ChangeNotifier{
     _scrollController = ScrollController();
     super.initState();
   }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    AppService appService = Provider.of<AppService>(context);
-    if(appService.nowPlayingData.result == null) {
+    AppService appService = Provider.of<AppService>(context, listen: false);
+    if (appService.nowPlayingData.result == null) {
       appService.getNowPlaying();
     }
-    if(!_scrollController.hasListeners) {
+    if (!_scrollController.hasListeners) {
       _scrollController.addListener(() {
         ScrollPosition position = _scrollController.position;
-        double percentScrolled = (_scrollController.offset / position.maxScrollExtent) * 100;
-        if(percentScrolled.toInt() > 60 && appService.nowPlayingData.hasNextPage) {
-          if(!fetchingMore) {
+        double percentScrolled =
+            (_scrollController.offset / position.maxScrollExtent) * 100;
+        if (percentScrolled.toInt() > 60 &&
+            appService.nowPlayingData.hasNextPage) {
+          if (!fetchingMore) {
             setState(() {
               fetchingMore = true;
               appService.getMoreNowPlaying().then((value) => setState(() {
-                fetchingMore = false;
-              }));
+                    fetchingMore = false;
+                  }));
             });
           }
-
         }
       });
     }
   }
 
   @override
+  void dispose() {
+    // TODO: implement dispose
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    AppService appService = Provider.of<AppService>(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.start,
@@ -64,9 +71,12 @@ class _NowPlayingState extends State<NowPlaying> with ChangeNotifier{
           ),
         ),
         Container(
-          height: 320.0,
-          child: render(appService),
-        ),
+            height: 320.0,
+            child: Consumer<AppService>(
+              builder: (context, appService, child) {
+                return render(appService);
+              },
+            )),
       ],
     );
   }
@@ -80,7 +90,8 @@ class _NowPlayingState extends State<NowPlaying> with ChangeNotifier{
       );
     } else if (nowPlayingData.isFetchingFailed) {
       return Center(
-        child: Text('Unable to fetch data, retrying', style: TextStyle(color: Colors.blueGrey)),
+        child: Text('Unable to fetch data, retrying',
+            style: TextStyle(color: Colors.blueGrey)),
       );
     } else if (nowPlayingData.isFetchSuccess && nowPlayingData.result != null) {
       return ListView.builder(
@@ -92,14 +103,17 @@ class _NowPlayingState extends State<NowPlaying> with ChangeNotifier{
               id: nowPlayingData.result[index]['id'],
               title: nowPlayingData.result[index]['title'],
               url: nowPlayingData.result[index]['poster_path'],
-              genres: Genres.getGenreNames(appService.genres, nowPlayingData.result[index]['genre_ids']));
+              genres: Genres.getGenreNames(appService.genres,
+                  nowPlayingData.result[index]['genre_ids']));
         },
         itemCount: nowPlayingData.result.length,
       );
     }
     return Center(
-      child: Text('Sadly, there are no movies showing at this time', style: TextStyle(color: Colors.blueGrey),),
+      child: Text(
+        'Sadly, there are no movies showing at this time',
+        style: TextStyle(color: Colors.blueGrey),
+      ),
     );
   }
-
 }

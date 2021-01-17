@@ -16,23 +16,26 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> {
 
-  AuthService authService;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    authService = Provider.of<AuthService>(context);
-    if(Auth.sharedPreferences.getString('SIGN_IN_METHOD') == GoogleAuthProvider.GOOGLE_SIGN_IN_METHOD) {
-      authService.signIn().then((value) => Navigator.popAndPushNamed(context, HomeScreen.id)).catchError((error) {
-        showDialog(context: context, builder: (context) => AlertDialog(content: Text('Error occured while trying to login')));
-        return error;
+  void initState() {
+    AuthService authService = Provider.of<AuthService>(context, listen: false);
+    if(Auth.sharedPreferences.getString('SIGN_IN_METHOD') == GoogleAuthProvider.GOOGLE_SIGN_IN_METHOD &&
+        !authService.auth.isAuthenticating) {
+      authService.signIn().then((isAuthenticated) {
+        if(!isAuthenticated) {
+          showDialog(context: context, builder: (context) => AlertDialog(content: Text('Could not login')));
+          return;
+        }
+        Navigator.popAndPushNamed(context, HomeScreen.id);
       });
     }
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    AuthService authService = Provider.of<AuthService>(context);
     return Scaffold(
       body: ModalProgressHUD(
         inAsyncCall: authService.auth.isAuthenticating,
@@ -48,20 +51,35 @@ class _AuthScreenState extends State<AuthScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                RoundedButton(
-                  onPressed: () async {
-                    await authService.signIn();
-                    if(authService.auth.isAuthenticated) {
-                      Navigator.popAndPushNamed(context, HomeScreen.id);
-                    }
-                  },
-                  child: Text(
-                    'Google Sign In',
-                    style: TextStyle(color: Colors.black87),
+                Container(
+                  width: 300,
+                  height: 300,
+                  decoration: BoxDecoration(
+                    boxShadow: [BoxShadow(color: Colors.black, spreadRadius: 15.0, offset: Offset.infinite)],
+                    color: Colors.white.withAlpha(120),
+                    borderRadius: BorderRadius.circular(10.0),
                   ),
-                  width: 200.0,
-                  height: 42.0,
-                  radius: 30.0,
+
+                  child: Center(
+                    child: RoundedButton(
+                      onPressed: () async {
+                        await authService.signIn();
+                        if(authService.auth.isAuthenticated) {
+                          Navigator.popAndPushNamed(context, HomeScreen.id);
+                        }
+                        else if(authService.auth.authError) {
+                          showDialog(context: context, builder: (context) => AlertDialog(content: Text('Could not login')));
+                        }
+                      },
+                      child: Text(
+                        'Google Sign In',
+                        style: TextStyle(color: Colors.black87),
+                      ),
+                      width: 200.0,
+                      height: 42.0,
+                      radius: 30.0,
+                    ),
+                  ),
                 )
               ],
             ),

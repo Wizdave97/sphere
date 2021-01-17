@@ -11,17 +11,21 @@ class Suggestions extends StatefulWidget {
 }
 
 class _SuggestionsState extends State<Suggestions> {
+
   @override
   Widget build(BuildContext context) {
-    AppService appService = Provider.of<AppService>(context);
-    List<dynamic> genres = appService.genres;
 
-    return genres != null
-        ? renderUI(appService)
-        : Container(
-            height: 100,
-            color: Colors.black26,
-          );
+    return Consumer<AppService>(
+      builder: (context, appService, child) {
+        List<dynamic> genres = appService.genres;
+        return genres != null
+            ? renderUI(appService)
+            : Container(
+          height: 100,
+          color: Colors.black26,
+        );
+      },
+    );
   }
 
   Widget renderUI(AppService appService) {
@@ -32,20 +36,18 @@ class _SuggestionsState extends State<Suggestions> {
       children: [
       suggestionsData.result != null ?
       Container(
-        margin: EdgeInsets.only(top: 10.0, left: 20.0, bottom: 10.0),
+        margin: EdgeInsets.only(top: 10.0, left: 10.0, bottom: 10.0),
         child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: suggestionsData.result
-                .map((e) => SuggestionCard(
-              id: e['id'],
-              title: e['title'],
-              release: e['release_date'],
-              voteAverage: e['vote_average'],
-              imgUrl: e['poster_path'],
-              genres: Genres.getGenreNames(genres, e['genre_ids']),
-            ))
-                .toList()),
-      ): Container(),
+          children: suggestionsData.result.map((e) => SuggestionCard(
+            Key(e['id'].toString()),
+            id: e['id'],
+            title: e['title'],
+            release: e['release_date'],
+            voteAverage: e['vote_average'],
+            imgUrl: e['poster_path'],
+            genres: Genres.getGenreNames(genres, e['genre_ids']),
+          ) ).toList()
+        )): Container(),
       suggestionsData.isFetchingFailed ?  Container(
         padding: EdgeInsets.all(20.0),
         child: Text('Unable to fetch data, retrying',
@@ -62,3 +64,4 @@ class _SuggestionsState extends State<Suggestions> {
     ],);
   }
 }
+

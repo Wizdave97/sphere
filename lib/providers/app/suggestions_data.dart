@@ -9,6 +9,7 @@ class SuggestionsData {
   bool isFetchSuccess = false;
   bool isFetchingFailed = false;
   List<dynamic> result;
+  List<dynamic> moreSuggestions = [];
 
   Future<void> fetchMovies() async {
       isFetching = true;
@@ -18,6 +19,7 @@ class SuggestionsData {
         isFetchSuccess = true;
         isFetchingFailed = false;
         result = response['results'];
+        moreSuggestions = response['results'];
         nextPage = response['total_pages'] > nextPage ? nextPage + 1 : nextPage;
         hasNextPage = response['total_pages'] > nextPage;
     } else {
@@ -43,7 +45,7 @@ class SuggestionsData {
     if(response != null) {
       nextPage = nextPage + 1;
       hasNextPage = response['total_pages'] > nextPage;
-      result.insertAll(result.length, response['results'] as List<dynamic>);
+      moreSuggestions.insertAll(moreSuggestions.length, response['results'] as List<dynamic>);
     }
   }
 

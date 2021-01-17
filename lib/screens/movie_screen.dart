@@ -49,6 +49,7 @@ class _MovieScreenState extends State<MovieScreen>
     }
     super.didChangeDependencies();
   }
+
   @override
   void dispose() {
     // TODO: implement dispose
@@ -57,30 +58,36 @@ class _MovieScreenState extends State<MovieScreen>
     } catch (e) {}
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
-    AppService appService = Provider.of<AppService>(context);
-    Movie movie = appService.movies[widget.movieId];
-
     return Scaffold(
       backgroundColor: Colors.black,
       body: CustomScrollView(
         slivers: [
-          SliverAppBar(
-            title: Text(!movie.fetchingMovie && movie.movie != null ? movie.movie['title'] : 'Movie'),
-            expandedHeight: 300.0,
-            backgroundColor: Colors.black12,
-            flexibleSpace: FlexibleSpaceBar(
-              background: renderAppbar(movie),
-            ),
-          ),
-          SliverList(
-              delegate: SliverChildListDelegate([
-            renderMovieDetails(movie),
-            renderMovieCredits(movie),
-            renderMoviePlot(movie),
-            renderMoviePosters(movie)
-          ]))
+          Consumer<AppService>(builder: (context, appService, child) {
+            Movie movie = appService.movies[widget.movieId];
+            return SliverAppBar(
+              title: Text(!movie.fetchingMovie && movie.movie != null
+                  ? movie.movie['title']
+                  : 'Movie'),
+              expandedHeight: 300.0,
+              backgroundColor: Colors.black12,
+              flexibleSpace: FlexibleSpaceBar(
+                background: renderAppbar(movie),
+              ),
+            );
+          }),
+          Consumer<AppService>(builder: (context, appService, child) {
+            Movie movie = appService.movies[widget.movieId];
+            return SliverList(
+                delegate: SliverChildListDelegate([
+              renderMovieDetails(movie),
+              renderMovieCredits(movie),
+              renderMoviePlot(movie),
+              renderMoviePosters(movie)
+            ]));
+          })
         ],
       ),
     );
@@ -92,7 +99,9 @@ class _MovieScreenState extends State<MovieScreen>
         animationController: animationController,
         height: null,
       );
-    } else if (!movie.fetchingMovie && !movie.fetchingMovieFailed && movie.movie != null) {
+    } else if (!movie.fetchingMovie &&
+        !movie.fetchingMovieFailed &&
+        movie.movie != null) {
       return Image.network(
         '$assetBaseUrl${movie.movie['backdrop_path']}',
         fit: BoxFit.cover,
@@ -126,51 +135,10 @@ class _MovieScreenState extends State<MovieScreen>
         animationController: animationController,
         height: 150.0,
       );
-    } else if (!movie.fetchingMovie && !movie.fetchingMovieFailed && movie.movie != null) {
-      return Container(
-        height: 150,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Text(
-              movie.movie['title'],
-              style: kMovieTitleTextStyle,
-              maxLines: 2,
-              textAlign: TextAlign.center,
-              textWidthBasis: TextWidthBasis.parent,
-            ),
-            Text(movie.movie['release_date'],
-                style: kMovieGenreTextStyle.copyWith(
-                    fontWeight: FontWeight.normal)),
-            Text(
-              '${movie.movie['vote_average']} / 10',
-              style: kMovieRatingTextStyle,
-            ),
-            Wrap(
-              spacing: 2.0,
-              runSpacing: 8.0,
-              alignment: WrapAlignment.center,
-              children: (movie.movie['genres'] as List<dynamic>)
-                  .map((genre) => Container(
-                        padding: EdgeInsets.all(7.0),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10.0),
-                          color: Color(0xff2F2F30),
-                        ),
-                        constraints:
-                            BoxConstraints.tightFor(width: 80.0, height: 30.0),
-                        margin: EdgeInsets.only(left: 4.0, right: 4.0),
-                        child: Center(
-                          child: Text(genre['name'],
-                              style: kSuggestionButtonTextStyle),
-                        ),
-                      ))
-                  .toList(),
-            )
-          ],
-        ),
-      );
+    } else if (!movie.fetchingMovie &&
+        !movie.fetchingMovieFailed &&
+        movie.movie != null) {
+      return MovieDetails(movie: movie);
     } else {
       return ErrorPanel();
     }
@@ -182,39 +150,10 @@ class _MovieScreenState extends State<MovieScreen>
         animationController: animationController,
         height: 200.0,
       );
-    } else if (!movie.fetchingMovie && !movie.fetchingMovieFailed && movie.movie != null) {
-      return Container(
-        height: 200,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              margin: EdgeInsets.only(left: 10.0),
-              child: Text(
-                'Plot',
-                style: kMovieTitleTextStyle,
-              ),
-            ),
-            SizedBox(
-              height: 5.0,
-            ),
-            Container(
-              height: 150,
-              margin: EdgeInsets.only(left: 10.0),
-              child: Text(
-                movie.movie['overview'],
-                maxLines: 3,
-                textWidthBasis: TextWidthBasis.parent,
-                overflow: TextOverflow.ellipsis,
-                style: kMovieGenreTextStyle.copyWith(
-                    color: Colors.white70,
-                    fontWeight: FontWeight.normal,
-                    fontSize: 14.0),
-              ),
-            )
-          ],
-        ),
-      );
+    } else if (!movie.fetchingMovie &&
+        !movie.fetchingMovieFailed &&
+        movie.movie != null) {
+      return MoviePlot(movie: movie);
     } else {
       return ErrorPanel();
     }
@@ -226,36 +165,10 @@ class _MovieScreenState extends State<MovieScreen>
         animationController: animationController,
         height: 250.0,
       );
-    } else if (!movie.fetchingCredits && !movie.fetchingCreditsFailed && movie.credits != null) {
-      return Container(
-        height: 250,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              margin: EdgeInsets.only(left: 10.0),
-              child: Text(
-                'Cast',
-                style: kMovieTitleTextStyle,
-              ),
-            ),
-            SizedBox(
-              height: 5.0,
-            ),
-            Container(
-              height: 200,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: movie.credits
-                    .map((credit) => Cast(
-                          credit: credit,
-                        ))
-                    .toList(),
-              ),
-            )
-          ],
-        ),
-      );
+    } else if (!movie.fetchingCredits &&
+        !movie.fetchingCreditsFailed &&
+        movie.credits != null) {
+      return MovieCast(movie: movie);
     } else {
       return ErrorPanel();
     }
@@ -268,54 +181,207 @@ class _MovieScreenState extends State<MovieScreen>
         color: Colors.grey,
       );
     } else {
-      return Container(
-        height: 250,
-        child: movie.images.length > 0
-            ? Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    margin: EdgeInsets.only(left: 10.0),
-                    child: Text(
-                      'Screenshots',
-                      style: kMovieTitleTextStyle,
-                    ),
-                  ),
-                  SizedBox(
-                    height: 5.0,
-                  ),
-                  Container(
-                    height: 200,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: movie.images
-                          .map((image) => Container(
-                                height: 200,
-                                margin:
-                                    EdgeInsets.only(left: 10.0, right: 10.0),
-                                color: Colors.grey,
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                    image: DecorationImage(
-                                        fit: BoxFit.cover,
-                                        image: NetworkImage(
-                                            '$assetBaseUrl${image['file_path']}'))),
-                              ))
-                          .toList(),
-                    ),
-                  )
-                ],
-              )
-            : Center(
-                child: Text(
-                  'There are no screenshots at this time',
-                  style: TextStyle(color: Colors.white70),
-                  softWrap: true,
-                  textWidthBasis: TextWidthBasis.parent,
-                ),
-              ),
-      );
+      return MoviePosters(movie: movie);
     }
   }
+}
 
+class MoviePlot extends StatelessWidget {
+  final Movie movie;
+  const MoviePlot({
+    Key key,
+    this.movie
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 200,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            margin: EdgeInsets.only(left: 10.0),
+            child: Text(
+              'Plot',
+              style: kMovieTitleTextStyle,
+            ),
+          ),
+          SizedBox(
+            height: 5.0,
+          ),
+          Container(
+            height: 150,
+            margin: EdgeInsets.only(left: 10.0),
+            child: Text(
+              movie.movie['overview'],
+              maxLines: 3,
+              textWidthBasis: TextWidthBasis.parent,
+              overflow: TextOverflow.ellipsis,
+              style: kMovieGenreTextStyle.copyWith(
+                  color: Colors.white70,
+                  fontWeight: FontWeight.normal,
+                  fontSize: 14.0),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class MovieCast extends StatelessWidget {
+  final Movie movie;
+  const MovieCast({
+    Key key,
+    this.movie
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 250,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            margin: EdgeInsets.only(left: 10.0),
+            child: Text(
+              'Cast',
+              style: kMovieTitleTextStyle,
+            ),
+          ),
+          SizedBox(
+            height: 5.0,
+          ),
+          Container(
+            height: 200,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: movie.credits
+                  .map((credit) => Cast(
+                        credit: credit,
+                      ))
+                  .toList(),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class MoviePosters extends StatelessWidget {
+  final Movie movie;
+  const MoviePosters({
+    Key key,
+    this.movie
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 250,
+      child: movie.images.length > 0
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  margin: EdgeInsets.only(left: 10.0),
+                  child: Text(
+                    'Screenshots',
+                    style: kMovieTitleTextStyle,
+                  ),
+                ),
+                SizedBox(
+                  height: 5.0,
+                ),
+                Container(
+                  height: 200,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    children: movie.images
+                        .map((image) => Container(
+                              height: 200,
+                              margin:
+                                  EdgeInsets.only(left: 10.0, right: 10.0),
+                              color: Colors.grey,
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                  image: DecorationImage(
+                                      fit: BoxFit.cover,
+                                      image: NetworkImage(
+                                          '$assetBaseUrl${image['file_path']}'))),
+                            ))
+                        .toList(),
+                  ),
+                )
+              ],
+            )
+          : Center(
+              child: Text(
+                'There are no screenshots at this time',
+                style: TextStyle(color: Colors.white70),
+                softWrap: true,
+                textWidthBasis: TextWidthBasis.parent,
+              ),
+            ),
+    );
+  }
+}
+
+class MovieDetails extends StatelessWidget {
+  final Movie movie;
+  const MovieDetails({
+    Key key,
+    this.movie
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 150,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Text(
+            movie.movie['title'],
+            style: kMovieTitleTextStyle,
+            maxLines: 2,
+            textAlign: TextAlign.center,
+            textWidthBasis: TextWidthBasis.parent,
+          ),
+          Text(movie.movie['release_date'],
+              style: kMovieGenreTextStyle.copyWith(
+                  fontWeight: FontWeight.normal)),
+          Text(
+            '${movie.movie['vote_average']} / 10',
+            style: kMovieRatingTextStyle,
+          ),
+          Wrap(
+            spacing: 2.0,
+            runSpacing: 8.0,
+            alignment: WrapAlignment.center,
+            children: (movie.movie['genres'] as List<dynamic>)
+                .map((genre) => Container(
+                      padding: EdgeInsets.all(7.0),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10.0),
+                        color: Color(0xff2F2F30),
+                      ),
+                      constraints:
+                          BoxConstraints.tightFor(width: 80.0, height: 30.0),
+                      margin: EdgeInsets.only(left: 4.0, right: 4.0),
+                      child: Center(
+                        child: Text(genre['name'],
+                            style: kSuggestionButtonTextStyle),
+                      ),
+                    ))
+                .toList(),
+          )
+        ],
+      ),
+    );
+  }
 }

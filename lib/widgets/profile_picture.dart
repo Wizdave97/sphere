@@ -38,7 +38,7 @@ class _ProfilePictureState extends State<ProfilePicture> {
         children: [
           CircleAvatar(
               backgroundImage: NetworkImage(widget.user.photoURL),
-              radius: 80.0),
+              radius: 40.0),
           SizedBox(
             width: 20.0,
           ),

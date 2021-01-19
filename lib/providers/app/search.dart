@@ -10,7 +10,7 @@ class Search {
 
   Future<void> fetchSilently(String query) async {
     final  url = 'https://api.themoviedb.org/3/search/movie?api_key='
-        '$MOVIE_DB_API_KEY&language=en-US&page=$_nextPage&include_adult=true&query=$query';
+        '$MOVIE_DB_API_KEY&language=en-US&page=$_nextPage&include_adult=false&query=$query';
     http.Response response = await http.get(url);
     if(response.body != null && response.statusCode == 200) {
       dynamic decodedJson = jsonDecode(response.body);

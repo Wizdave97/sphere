@@ -238,12 +238,18 @@ class _AboutState extends State<About> {
 
   @override
   void didUpdateWidget(covariant About oldWidget) {
-    movieQuoteController = TextEditingController(text: widget.user.movieQuote);
-    favMovieController =
-        TextEditingController(text: widget.user.favouriteMovie);
+      if(oldWidget.user != widget.user) {
+        movieQuoteController.text = widget.user.movieQuote;
+        favMovieController.text =   widget.user.favouriteMovie;
+      }
     super.didUpdateWidget(oldWidget);
   }
-
+@override
+  void deactivate() {
+    movieQuoteController.dispose();
+    favMovieController.dispose();
+    super.deactivate();
+  }
   @override
   Widget build(BuildContext context) {
     UserModel.User user = widget.user;
